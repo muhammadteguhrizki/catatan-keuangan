@@ -1,12 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Image, Modal, Pressable, Text, View } from "react-native";
 
 import ScreenContainer from "../../../components/layout/ScreenContainer";
+import type { Profile } from "../../../database/repositories/profileRepository";
+import { getProfile } from "../../../database/repositories/profileRepository";
 import { getTransactions } from "../../../database/repositories/transactionRepository";
 import type { Transaction } from "../../../database/types";
 import { useAppTheme } from "../../../theme/ThemeProvider";
+import { getProfilePhotoUri } from "../../../utils/profilePhoto";
 
 import BalanceCard from "../components/BalanceCard";
 import CashFlowChart from "../components/CashFlowChart";
@@ -82,6 +85,8 @@ function getCategoryIcon(category: string): keyof typeof Ionicons.glyphMap {
 }
 
 export default function DashboardScreen() {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [displayPhoto, setDisplayPhoto] = useState("");
   const { colors } = useAppTheme();
   const router = useRouter();
 
@@ -119,6 +124,22 @@ export default function DashboardScreen() {
       }
 
       loadTransactions();
+
+      async function loadProfile() {
+        try {
+          const data = await getProfile();
+          const photoUri = await getProfilePhotoUri(data?.photo ?? "");
+
+          if (active) {
+            setProfile(data);
+            setDisplayPhoto(photoUri);
+          }
+        } catch (error) {
+          console.error("Gagal mengambil profil Dashboard:", error);
+        }
+      }
+
+      loadProfile();
 
       return () => {
         active = false;
@@ -257,8 +278,16 @@ export default function DashboardScreen() {
         {/* HEADER */}
         <View className="mt-3 mb-5 flex-row items-center justify-between">
           <View className="flex-row items-center">
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-violet-600">
-              <Ionicons name="person" size={23} color="#FFFFFF" />
+            <View className="h-12 w-12 overflow-hidden items-center justify-center rounded-full bg-violet-600">
+              {displayPhoto ? (
+                <Image
+                  source={{ uri: displayPhoto }}
+                  className="h-12 w-12 rounded-full"
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="person" size={23} color="#FFFFFF" />
+              )}
             </View>
 
             <View className="ml-3">
@@ -270,7 +299,7 @@ export default function DashboardScreen() {
                 style={{ color: colors.text }}
                 className="text-lg font-bold"
               >
-                Halo, Teguh 👋
+                Halo, {profile?.name?.trim() || "Pengguna"} 👋
               </Text>
             </View>
           </View>

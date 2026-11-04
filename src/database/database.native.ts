@@ -32,5 +32,17 @@ export async function initializeDatabase() {
       icon TEXT,
       color TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS profile (
+      id INTEGER PRIMARY KEY CHECK(id = 1),
+      name TEXT NOT NULL DEFAULT '',
+      email TEXT DEFAULT '',
+      phone TEXT DEFAULT '',
+      photo TEXT DEFAULT '',
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    INSERT OR IGNORE INTO profile (id, name, email, phone, photo)
+    VALUES (1, '', '', '', '');
   `);
 }
