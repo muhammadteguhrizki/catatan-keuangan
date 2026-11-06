@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Slot, usePathname, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppTheme } from "../theme/ThemeProvider";
 
 const menu = [
   { name: "index", label: "Beranda", icon: "home-outline", activeIcon: "home" },
@@ -35,14 +36,34 @@ export default function AppTabs() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { isDark } = useAppTheme();
+
+  const theme = {
+    background: isDark ? "#090D18" : "#F7F7FC",
+    tabBackground: isDark ? "#111827" : "#FFFFFF",
+    border: isDark ? "#293247" : "#E8E8F0",
+    active: isDark ? "#A78BFA" : "#7C3AED",
+    inactive: isDark ? "#94A3B8" : "#9292A3",
+    addButton: "#8B5CF6",
+    addIcon: "#FFFFFF",
+  };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.content}>
         <Slot />
       </View>
 
-      <View style={[styles.outer, { paddingBottom: insets.bottom }]}>
+      <View
+        style={[
+          styles.outer,
+          {
+            paddingBottom: insets.bottom,
+            backgroundColor: theme.tabBackground,
+            borderTopColor: theme.border,
+          },
+        ]}
+      >
         <View style={styles.tabBar}>
           {menu.map((item) => {
             const active =
@@ -63,17 +84,29 @@ export default function AppTabs() {
                 style={styles.tabButton}
               >
                 {isAdd ? (
-                  <View style={styles.addButton}>
-                    <Ionicons name="add" size={30} color="#FFFFFF" />
+                  <View
+                    style={[
+                      styles.addButton,
+                      { backgroundColor: theme.addButton },
+                    ]}
+                  >
+                    <Ionicons name="add" size={30} color={theme.addIcon} />
                   </View>
                 ) : (
                   <>
                     <Ionicons
                       name={active ? item.activeIcon : item.icon}
                       size={23}
-                      color={active ? "#A78BFA" : "#94A3B8"}
+                      color={active ? theme.active : theme.inactive}
                     />
-                    <Text style={[styles.label, active && styles.activeLabel]}>
+
+                    <Text
+                      style={[
+                        styles.label,
+                        { color: active ? theme.active : theme.inactive },
+                        active && styles.activeLabel,
+                      ]}
+                    >
                       {item.label}
                     </Text>
                   </>
@@ -88,14 +121,16 @@ export default function AppTabs() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#090D18" },
-  content: { flex: 1 },
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+  },
   outer: {
     width: "100%",
     alignItems: "center",
-    backgroundColor: "#111827",
     borderTopWidth: 1,
-    borderTopColor: "#293247",
   },
   tabBar: {
     width: "100%",
@@ -114,13 +149,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 5,
   },
-  label: { fontSize: 10, color: "#94A3B8" },
-  activeLabel: { color: "#A78BFA", fontWeight: "700" },
+  label: {
+    fontSize: 10,
+  },
+  activeLabel: {
+    fontWeight: "700",
+  },
   addButton: {
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: "#8B5CF6",
     alignItems: "center",
     justifyContent: "center",
   },

@@ -2,14 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import AppAlert, { type AppAlertType } from "../components/ui/AppAlert";
 import AppCard from "../components/ui/AppCard";
 import {
@@ -52,6 +57,7 @@ function changeMonth(month: string, offset: number) {
 }
 export default function BudgetScreen() {
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [monthPickerVisible, setMonthPickerVisible] = useState(false);
   const [pickerMonth, setPickerMonth] = useState(getCurrentMonth());
@@ -549,6 +555,7 @@ export default function BudgetScreen() {
           </View>
         </View>
       </Modal>
+
       {/* ADD BUDGET MODAL */}
       <Modal
         visible={modalVisible}
@@ -556,107 +563,129 @@ export default function BudgetScreen() {
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View
-          className="flex-1 justify-end"
-          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0,0,0,0.45)",
+          }}
         >
           <View
             className="rounded-t-3xl p-5"
-            style={{ backgroundColor: colors.background }}
+            style={{
+              backgroundColor: colors.background,
+              maxHeight: "85%",
+              paddingBottom: Math.max(insets.bottom, 24),
+            }}
           >
-            <View className="mb-5 flex-row items-center justify-between">
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 8 }}
+            >
+              <View className="mb-5 flex-row items-center justify-between">
+                <Text
+                  className="text-lg font-bold"
+                  style={{ color: colors.text }}
+                >
+                  Tambah Anggaran
+                </Text>
+
+                <Pressable onPress={() => setModalVisible(false)}>
+                  <Ionicons
+                    name="close-circle"
+                    size={27}
+                    color={colors.textSecondary}
+                  />
+                </Pressable>
+              </View>
+
               <Text
-                className="text-lg font-bold"
+                className="mb-3 text-sm font-semibold"
                 style={{ color: colors.text }}
               >
-                Tambah Anggaran
+                Pilih Kategori
               </Text>
-              <Pressable onPress={() => setModalVisible(false)}>
-                <Ionicons
-                  name="close-circle"
-                  size={27}
-                  color={colors.textSecondary}
-                />
-              </Pressable>
-            </View>
-            <Text
-              className="mb-3 text-sm font-semibold"
-              style={{ color: colors.text }}
-            >
-              Pilih Kategori
-            </Text>
-            <View className="mb-5 flex-row flex-wrap gap-2">
-              {categories.length === 0 ? (
-                <Text
-                  className="text-xs"
-                  style={{ color: colors.textSecondary }}
-                >
-                  Belum ada kategori pengeluaran. Tambahkan kategori terlebih
-                  dahulu melalui menu Kategori.
-                </Text>
-              ) : (
-                categories.map((category) => {
-                  const active = selectedCategory === category.name;
-                  return (
-                    <Pressable
-                      key={category.id}
-                      onPress={() => setSelectedCategory(category.name)}
-                      className="rounded-xl px-4 py-3"
-                      style={{
-                        backgroundColor: active
-                          ? colors.primary
-                          : colors.surface,
-                      }}
-                    >
-                      <Text
-                        className="text-xs font-semibold"
+
+              <View className="mb-5 flex-row flex-wrap gap-2">
+                {categories.length === 0 ? (
+                  <Text
+                    className="text-xs"
+                    style={{ color: colors.textSecondary }}
+                  >
+                    Belum ada kategori pengeluaran. Tambahkan kategori terlebih
+                    dahulu melalui menu Kategori.
+                  </Text>
+                ) : (
+                  categories.map((category) => {
+                    const active = selectedCategory === category.name;
+
+                    return (
+                      <Pressable
+                        key={category.id}
+                        onPress={() => setSelectedCategory(category.name)}
+                        className="rounded-xl px-4 py-3"
                         style={{
-                          color: active ? "#FFFFFF" : colors.text,
+                          backgroundColor: active
+                            ? colors.primary
+                            : colors.surface,
                         }}
                       >
-                        {category.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })
-              )}
-            </View>
-            <Text
-              className="mb-2 text-sm font-semibold"
-              style={{ color: colors.text }}
-            >
-              Nominal Anggaran
-            </Text>
-            <TextInput
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="Contoh: 2000000"
-              placeholderTextColor={colors.textSecondary}
-              keyboardType="numeric"
-              className="mb-5 rounded-2xl px-4 py-4"
-              style={{
-                backgroundColor: colors.surface,
-                color: colors.text,
-                borderWidth: 1,
-                borderColor: colors.border,
-              }}
-            />
-            <Pressable
-              onPress={handleSave}
-              disabled={saving || categories.length === 0}
-              className="items-center rounded-2xl py-4"
-              style={{
-                backgroundColor: colors.primary,
-                opacity: saving || categories.length === 0 ? 0.6 : 1,
-              }}
-            >
-              <Text className="text-sm font-bold text-white">
-                {saving ? "Menyimpan..." : "Simpan Anggaran"}
+                        <Text
+                          className="text-xs font-semibold"
+                          style={{
+                            color: active ? "#FFFFFF" : colors.text,
+                          }}
+                        >
+                          {category.name}
+                        </Text>
+                      </Pressable>
+                    );
+                  })
+                )}
+              </View>
+
+              <Text
+                className="mb-2 text-sm font-semibold"
+                style={{ color: colors.text }}
+              >
+                Nominal Anggaran
               </Text>
-            </Pressable>
+
+              <TextInput
+                value={amount}
+                onChangeText={setAmount}
+                placeholder="Contoh: 2000000"
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="numeric"
+                className="mb-5 rounded-2xl px-4 py-4"
+                style={{
+                  backgroundColor: colors.surface,
+                  color: colors.text,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              />
+
+              <Pressable
+                onPress={handleSave}
+                disabled={saving || categories.length === 0}
+                className="items-center rounded-2xl py-4"
+                style={{
+                  backgroundColor: colors.primary,
+                  opacity: saving || categories.length === 0 ? 0.6 : 1,
+                }}
+              >
+                <Text className="text-sm font-bold text-white">
+                  {saving ? "Menyimpan..." : "Simpan Anggaran"}
+                </Text>
+              </Pressable>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
+
       {/* CUSTOM ALERT */}
       <AppAlert
         visible={alert.visible}

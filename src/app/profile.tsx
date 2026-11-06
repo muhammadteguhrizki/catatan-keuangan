@@ -385,7 +385,7 @@ export default function ProfileScreen() {
 
         <View className="mt-7 items-center">
           <Text className="text-xs" style={{ color: colors.textSecondary }}>
-            Personal Finance
+            TeguhDev
           </Text>
 
           <Text
@@ -405,7 +405,7 @@ export default function ProfileScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{
             flex: 1,
             justifyContent: "flex-end",
@@ -448,6 +448,7 @@ export default function ProfileScreen() {
             <ScrollView
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 24 }}
             >
               {/* PREVIEW FOTO DI MODAL */}
               <View className="mb-5 items-center">

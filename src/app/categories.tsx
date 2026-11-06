@@ -2,7 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -434,15 +436,20 @@ export default function CategoriesScreen() {
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View
-          className="flex-1 justify-end"
-          style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0,0,0,0.65)",
+          }}
         >
           <View
             className="rounded-t-3xl p-5"
             style={{
               backgroundColor: colors.background,
               maxHeight: "90%",
+              paddingBottom: 24,
             }}
           >
             <View className="mb-5 flex-row items-center justify-between">
@@ -453,18 +460,20 @@ export default function CategoriesScreen() {
                 {editingCategory ? "Edit Kategori" : "Tambah Kategori"}
               </Text>
 
-              <Pressable
-                onPress={() => setModalVisible(false)}
-                className="h-9 w-9 items-center justify-center rounded-full"
-                style={{ backgroundColor: colors.surface }}
-              >
-                <Ionicons name="close" size={20} color={colors.text} />
+              <Pressable onPress={() => setModalVisible(false)}>
+                <View
+                  className="h-9 w-9 items-center justify-center rounded-full"
+                  style={{ backgroundColor: colors.surface }}
+                >
+                  <Ionicons name="close" size={20} color={colors.text} />
+                </View>
               </Pressable>
             </View>
 
             <ScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 12 }}
             >
               <Text
                 className="mb-2 text-xs font-semibold"
@@ -560,10 +569,10 @@ export default function CategoriesScreen() {
                 </Text>
               </Pressable>
 
-              <View className="h-6" />
+              <View className="h-4" />
             </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ALERT */}
